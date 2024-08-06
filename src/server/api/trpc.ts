@@ -6,13 +6,13 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { redirect } from "next/navigation";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
-import { db } from "@/server/db";
+import { db } from "@/server/drizzle";
 
 /**
  * 1. CONTEXT
@@ -45,7 +45,16 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     }
   }
 
+  if (!session) {
+    return {
+      session: null,
+      supabase,
+      db,
+    };
+  }
+
   return {
+    session,
     db,
     supabase,
     ...opts,
@@ -117,6 +126,23 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   return result;
 });
 
+export const isLoggedIn = t.middleware(({ ctx, next }) => {
+  if (!ctx.session?.user) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+    });
+  }
+
+  return next({
+    ctx: {
+      // Infers the `session` as non-nullable
+      session: ctx.session,
+      db: ctx.db,
+      supabase: ctx.supabase,
+    },
+  });
+});
+
 /**
  * Public (unauthenticated) procedure
  *
@@ -125,3 +151,7 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+export const protectedProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(isLoggedIn);
