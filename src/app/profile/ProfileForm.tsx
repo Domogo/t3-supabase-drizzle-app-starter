@@ -19,7 +19,7 @@ import Divider from "@/components/Divider";
 export const ProfileForm: FC<{
   editProfile: (
     prevState: ProfileActionState,
-    data: FormData
+    data: FormData,
   ) => Promise<ProfileActionState>;
 }> = ({ editProfile }) => {
   const [state, formAction] = useFormState(editProfile, {
@@ -43,10 +43,10 @@ export const ProfileForm: FC<{
   };
   return (
     <Form {...form}>
-      <form action={onSubmit} className="space-y-8 w-full mt-8">
+      <form action={onSubmit} className="mt-8 w-full space-y-8">
         <div className="space-y-8">
           <h2>Personal information</h2>
-          <div className="flex justify-between items-center gap-8">
+          <div className="flex items-center justify-between gap-8">
             <FormField
               control={form.control}
               name="first_name"
@@ -96,41 +96,6 @@ export const ProfileForm: FC<{
               </FormItem>
             )}
           />
-        </div>
-
-        <Divider />
-        <div className="space-y-8">
-          <h2>Diet preferences</h2>
-        </div>
-
-        <Divider />
-
-        <div className="space-y-8">
-          <h2>Allergies</h2>
-        </div>
-
-        <Divider />
-
-        <div className="space-y-8">
-          <h2>Caloric intake preferences</h2>
-        </div>
-
-        <Divider />
-
-        <div className="space-y-8">
-          <h2>Budgeting options</h2>
-        </div>
-
-        <Divider />
-
-        <div className="space-y-8">
-          <h2>Time saving options</h2>
-        </div>
-
-        <Divider />
-
-        <div className="space-y-8">
-          <h2>Newsletter</h2>
         </div>
       </form>
     </Form>
