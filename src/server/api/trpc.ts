@@ -7,11 +7,12 @@
  * need to use are documented accordingly near the end.
  */
 import { initTRPC } from "@trpc/server";
+import { redirect } from "next/navigation";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { createClient } from "~/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
-import { db } from "~/server/db";
+import { db } from "@/server/db";
 
 /**
  * 1. CONTEXT
@@ -27,6 +28,22 @@ import { db } from "~/server/db";
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const supabase = createClient();
+
+  const { data, error } = await supabase.auth.getSession();
+  let session = data?.session;
+
+  if (error) {
+    if (error.name === "AuthApiError") {
+      // session expired, try refreshing
+      const { data } = await supabase.auth.refreshSession();
+      session = data.session;
+
+      // handle missing case here separately, because we don't want to redirect to login if there was no error (there are some public pages after all)
+      if (!session) {
+        redirect("/login");
+      }
+    }
+  }
 
   return {
     db,
