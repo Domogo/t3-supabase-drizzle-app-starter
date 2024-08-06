@@ -14,7 +14,6 @@ import {
   Form,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Divider from "@/components/Divider";
 
 export const ProfileForm: FC<{
   editProfile: (
