@@ -38,6 +38,27 @@ Then go to supabase/migrations folder and add your SQL there.
 pnpm dev
 ```
 
+- Login to supabase CLI
+
+```
+supabase login
+
+supabase init
+```
+
+- Generate supabase types (from the supabase dir)
+
+```
+supabase gen types --lang=typescript --project-id "$PROJECT_REF" --schema public > database.types.ts
+```
+
+- Generate drizzle schema
+  https://orm.drizzle.team/kit-docs/commands#introspect--pull
+
+```
+drizzle-kit introspect
+```
+
 If you are not familiar with the different technologies used in this project, please refer to the respective docs.
 
 - [Next.js app router](https://nextjs.org/docs)
