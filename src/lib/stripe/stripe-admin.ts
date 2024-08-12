@@ -5,6 +5,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 // https://github.com/KolbySisk/next-supabase-stripe-starter
+// https://www.youtube.com/watch?v=I7CFD99sp1g
 export async function createOrRetrieveCustomer({
   uuid,
   email,
