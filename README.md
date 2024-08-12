@@ -8,6 +8,7 @@ This is a starter project/boilerplate to start out with:
 - App directory
 - Drizzle
 - Supabase (Auth, Database, Migrations, Storage)
+- Stripe
 - Tailwind / Shadcn/UI
 - Edge Ready
 - Fully set up CI/CD out of the box, all you have to do is add the secrets!
@@ -66,6 +67,7 @@ If you are not familiar with the different technologies used in this project, pl
 - [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
 - [Supabase](https://supabase.com/docs)
+- [Stripe](https://stripe.com/docs/api)
 - [shadcn/ui](https://ui.shadcn.com/)
 
 ## Learn More
