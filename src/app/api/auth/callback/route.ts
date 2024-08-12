@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { createOrRetrieveCustomer } from "@/lib/stripe/stripe-admin"; // Add this import
 
 export async function GET(request: Request) {
   // The `/auth/callback` route is required for the server-side auth flow implemented
@@ -11,7 +12,21 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const {
+      data: { user },
+    } = await supabase.auth.exchangeCodeForSession(code);
+
+    const email = user?.email;
+    if (!email) {
+      return NextResponse.redirect(`${origin}/login`);
+    }
+    // Add Stripe customer creation
+    if (user) {
+      await createOrRetrieveCustomer({
+        uuid: user.id,
+        email,
+      });
+    }
   }
 
   // URL to redirect to after sign up process completes
