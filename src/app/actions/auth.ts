@@ -1,5 +1,9 @@
-import { signInSchema, type SignInSchema, type SignUpSchema } from "@/lib/schema/auth";
-import { createClient } from "@/lib/supabase/client";
+import {
+  signInSchema,
+  type SignInSchema,
+  type SignUpSchema,
+} from "@/lib/schema/auth";
+import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -11,7 +15,7 @@ export type AuthActionsState = {
 
 export const signIn = async (
   prevState: AuthActionsState,
-  formData: FormData
+  formData: FormData,
 ): Promise<AuthActionsState> => {
   "use server";
 
@@ -50,7 +54,7 @@ export const signIn = async (
 
 export const signUp = async (
   prevState: AuthActionsState,
-  formData: FormData
+  formData: FormData,
 ) => {
   "use server";
 
