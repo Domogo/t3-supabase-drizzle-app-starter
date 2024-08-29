@@ -1,9 +1,13 @@
 import {
+  EMAIL_SCHEMA,
+  RESET_PASSWORD_SCHEMA,
+  ResetPasswordSchema,
   signInSchema,
   type SignInSchema,
   type SignUpSchema,
 } from "@/lib/schema/auth";
 import { createClient } from "@/lib/supabase/server";
+import { AuthApiError } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -11,6 +15,12 @@ export type AuthActionsState = {
   message?: string;
   issues?: string[];
   fields?: SignInSchema;
+};
+
+export type ResetPasswordActionsState = {
+  message?: string;
+  issues?: string[];
+  fields?: ResetPasswordSchema;
 };
 
 export const signIn = async (
@@ -99,3 +109,91 @@ export const signUp = async (
     fields: parsed.data,
   };
 };
+
+export async function handleForgotPassword(
+  prevState: any,
+  formData: FormData,
+): Promise<{ error: boolean; message?: string }> {
+  "use server";
+  const email = formData.get("email");
+
+  const result = EMAIL_SCHEMA.safeParse(email);
+
+  if (!result.success) {
+    return { error: true, message: result?.error?.errors?.[0]?.message };
+  }
+
+  try {
+    const supabase = createClient();
+    const origin = headers().get("origin");
+    const response = await supabase.auth.resetPasswordForEmail(result.data, {
+      // captchaToken: input.captchaToken,
+      redirectTo: `${origin}/reset-password`,
+    });
+
+    if (response.error) {
+      return { error: true, message: response.error.message };
+    }
+
+    return { error: false, message: "Password reset link sent to your email." };
+  } catch (error) {
+    console.error("Error in handleForgotPassword:", error);
+    return {
+      error: true,
+      message: "An error occurred. Please try again later.",
+    };
+  }
+}
+
+export async function resetPassword(
+  prevState: ResetPasswordActionsState,
+  formData: ResetPasswordSchema,
+) {
+  "use server";
+
+  const parsed = RESET_PASSWORD_SCHEMA.safeParse(formData);
+  if (!parsed.success) {
+    return {
+      issues: parsed.error.issues.map(
+        (error) => error.message + " " + error.path,
+      ),
+      fields: parsed.data,
+    };
+  }
+  try {
+    const supabase = createClient();
+    const { password, code } = parsed.data;
+
+    const { error: sessionError } =
+      await supabase.auth.exchangeCodeForSession(code);
+
+    if (sessionError) {
+      return {
+        issues: [sessionError.message],
+        fields: parsed.data,
+      };
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password,
+    });
+
+    if (updateError) {
+      return {
+        issues: [updateError.message],
+        fields: parsed.data,
+      };
+    }
+
+    return {
+      message: "Password reset successful!",
+      fields: parsed.data,
+    };
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    return {
+      issues: [(error as AuthApiError).message],
+      fields: parsed.data,
+    };
+  }
+}
